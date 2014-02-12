@@ -16,15 +16,26 @@ class PackageNameWsdlClass extends stdClass implements ArrayAccess,Iterator,Coun
 	 */
 	const WSDL_URL = 'wsdl_url';
 	/**
+	 * Constant to define the default WSDL URI
+	 * @var string
+	 */
+	const VALUE_WSDL_URL = 'wsdl_url_value';
+	/**
 	 * Option key to define WSDL login
 	 * @var string
 	 */
 	const WSDL_LOGIN = 'wsdl_login';
 	/**
 	 * Option key to define WSDL password
+	 * @deprecated use WSDL_PASSWORD instead
 	 * @var string
 	 */
 	const WSDL_PASSWD = 'wsdl_password';
+	/**
+	 * Option key to define WSDL password
+	 * @var string
+	 */
+	const WSDL_PASSWORD = 'wsdl_password';
 	/**
 	 * Option key to define WSDL trace option
 	 * @var string
@@ -32,9 +43,15 @@ class PackageNameWsdlClass extends stdClass implements ArrayAccess,Iterator,Coun
 	const WSDL_TRACE = 'wsdl_trace';
 	/**
 	 * Option key to define WSDL exceptions
+	 * @deprecated use WSDL_EXCEPTIONS instead
 	 * @var string
 	 */
 	const WSDL_EXCPTS = 'wsdl_exceptions';
+	/**
+	 * Option key to define WSDL exceptions
+	 * @var string
+	 */
+	const WSDL_EXCEPTIONS = 'wsdl_exceptions';
 	/**
 	 * Option key to define WSDL cache_wsdl
 	 * @var string
@@ -84,7 +101,7 @@ class PackageNameWsdlClass extends stdClass implements ArrayAccess,Iterator,Coun
 	 * Option key to define WSDL keep_alive
 	 * @var string
 	 */
-	const WSDL_FKEEP_ALIVE = 'wsdl_keep_alive';
+	const WSDL_KEEP_ALIVE = 'wsdl_keep_alive';
 	/**
 	 * Soapclient called to communicate with the actual SOAP Service
 	 * @var SoapClient
@@ -160,7 +177,7 @@ class PackageNameWsdlClass extends stdClass implements ArrayAccess,Iterator,Coun
 		if(class_exists($_className))
 		{
 			$object = @new $_className();
-			if($object)
+			if(is_object($object) && is_subclass_of($object,'PackageNameWsdlClass'))
 			{
 				foreach($_array as $name=>$value)
 					$object->_set($name,$value);
@@ -223,16 +240,19 @@ class PackageNameWsdlClass extends stdClass implements ArrayAccess,Iterator,Coun
 	 * @uses PackageNameWsdlClass::WSDL_COMPRESSION
 	 * @uses PackageNameWsdlClass::WSDL_CONNECTION_TIMEOUT
 	 * @uses PackageNameWsdlClass::WSDL_ENCODING
-	 * @uses PackageNameWsdlClass::WSDL_EXCPTS
+	 * @uses PackageNameWsdlClass::WSDL_EXCEPTIONS
 	 * @uses PackageNameWsdlClass::WSDL_FEATURES
 	 * @uses PackageNameWsdlClass::WSDL_LOGIN
-	 * @uses PackageNameWsdlClass::WSDL_PASSWD
+	 * @uses PackageNameWsdlClass::WSDL_PASSWORD
 	 * @uses PackageNameWsdlClass::WSDL_SOAP_VERSION
 	 * @uses PackageNameWsdlClass::WSDL_STREAM_CONTEXT
 	 * @uses PackageNameWsdlClass::WSDL_TRACE
 	 * @uses PackageNameWsdlClass::WSDL_TYPEMAP
 	 * @uses PackageNameWsdlClass::WSDL_URL
+	 * @uses PackageNameWsdlClass::VALUE_WSDL_URL
 	 * @uses PackageNameWsdlClass::WSDL_USER_AGENT
+	 * @uses SOAP_SINGLE_ELEMENT_ARRAYS
+	 * @uses SOAP_USE_XSI_ARRAY_TYPE
 	 * @return array
 	 */
 	public static function getDefaultWsdlOptions()
@@ -242,15 +262,15 @@ class PackageNameWsdlClass extends stdClass implements ArrayAccess,Iterator,Coun
 					self::WSDL_COMPRESSION=>null,
 					self::WSDL_CONNECTION_TIMEOUT=>null,
 					self::WSDL_ENCODING=>null,
-					self::WSDL_EXCPTS=>true,
-					self::WSDL_FEATURES=>null,
+					self::WSDL_EXCEPTIONS=>true,
+					self::WSDL_FEATURES=>SOAP_SINGLE_ELEMENT_ARRAYS | SOAP_USE_XSI_ARRAY_TYPE,
 					self::WSDL_LOGIN=>null,
-					self::WSDL_PASSWD=>null,
+					self::WSDL_PASSWORD=>null,
 					self::WSDL_SOAP_VERSION=>null,
 					self::WSDL_STREAM_CONTEXT=>null,
 					self::WSDL_TRACE=>true,
 					self::WSDL_TYPEMAP=>null,
-					self::WSDL_URL=>null,
+					self::WSDL_URL=>self::VALUE_WSDL_URL,
 					self::WSDL_USER_AGENT=>null);
 	}
 	/**
@@ -294,6 +314,38 @@ class PackageNameWsdlClass extends stdClass implements ArrayAccess,Iterator,Coun
 		return null;
 	}
 	/**
+	 * Returns the last request headers used by the SoapClient object as the original value or an array
+	 * @see SoapClient::__getLastRequestHeaders()
+	 * @uses PackageNameWsdlClass::getSoapClient()
+	 * @uses PackageNameWsdlClass::convertStringHeadersToArray()
+	 * @uses SoapClient::__getLastRequestHeaders()
+	 * @param bool $_asArray allows to get the headers in an associative array
+	 * @return null|string|array
+	 */
+	public function getLastRequestHeaders($_asArray = false)
+	{
+		$headers = self::getSoapClient()?self::getSoapClient()->__getLastRequestHeaders():null;
+		if(is_string($headers) && $_asArray)
+			return self::convertStringHeadersToArray($headers);
+		return $headers;
+	}
+	/**
+	 * Returns the last response headers used by the SoapClient object as the original value or an array
+	 * @see SoapClient::__getLastResponseHeaders()
+	 * @uses PackageNameWsdlClass::getSoapClient()
+	 * @uses PackageNameWsdlClass::convertStringHeadersToArray()
+	 * @uses SoapClient::__getLastRequestHeaders()
+	 * @param bool $_asArray allows to get the headers in an associative array
+	 * @return null|string|array
+	 */
+	public function getLastResponseHeaders($_asArray = false)
+	{
+		$headers = self::getSoapClient()?self::getSoapClient()->__getLastResponseHeaders():null;
+		if(is_string($headers) && $_asArray)
+			return self::convertStringHeadersToArray($headers);
+		return $headers;
+	}
+	/**
 	 * Returns a XML string content as a DOMDocument or as a formated XML string
 	 * @uses DOMDocument::loadXML()
 	 * @uses DOMDocument::saveXML()
@@ -301,9 +353,9 @@ class PackageNameWsdlClass extends stdClass implements ArrayAccess,Iterator,Coun
 	 * @param bool $_asDomDocument
 	 * @return DOMDocument|string|null
 	 */
-	public function getFormatedXml($_string,$_asDomDocument = false)
+	public static function getFormatedXml($_string,$_asDomDocument = false)
 	{
-		if(class_exists('DOMDocument'))
+		if(!empty($_string) && class_exists('DOMDocument'))
 		{
 			$dom = new DOMDocument('1.0','UTF-8');
 			$dom->formatOutput = true;
@@ -315,6 +367,137 @@ class PackageNameWsdlClass extends stdClass implements ArrayAccess,Iterator,Coun
 				return $_asDomDocument?$dom:$dom->saveXML();
 		}
 		return $_asDomDocument?null:$_string;
+	}
+	/**
+	 * Returns an associative array between the headers name and their respective values
+	 * @param string $_headers
+	 * @return array
+	 */
+	public static function convertStringHeadersToArray($_headers)
+	{
+		$lines = explode("\r\n",$_headers);
+		$headers = array();
+		foreach($lines as $line)
+		{
+			if(strpos($line,':'))
+			{
+				$headerParts = explode(':',$line);
+				$headers[$headerParts[0]] = trim(implode(':',array_slice($headerParts,1)));
+			}
+		}
+		return $headers;
+	}
+	/**
+	 * Sets a SoapHeader to send
+	 * For more information, please read the online documentation on {@link http://www.php.net/manual/en/class.soapheader.php}
+	 * @uses PackageNameWsdlClass::getSoapClient()
+	 * @uses SoapClient::__setSoapheaders()
+	 * @param string $_nameSpace SoapHeader namespace
+	 * @param string $_name SoapHeader name
+	 * @param mixed $_data SoapHeader data
+	 * @param bool $_mustUnderstand
+	 * @param string $_actor
+	 * @return bool true|false
+	 */
+	public function setSoapHeader($_nameSpace,$_name,$_data,$_mustUnderstand = false,$_actor = null)
+	{
+		if(self::getSoapClient())
+		{
+			$defaultHeaders = (isset(self::getSoapClient()->__default_headers) && is_array(self::getSoapClient()->__default_headers))?self::getSoapClient()->__default_headers:array();
+			foreach($defaultHeaders as $index=>$soapheader)
+			{
+				if($soapheader->name == $_name)
+				{
+					unset($defaultHeaders[$index]);
+					break;
+				}
+			}
+			self::getSoapClient()->__setSoapheaders(null);
+			if(!empty($_actor))
+				array_push($defaultHeaders,new SoapHeader($_nameSpace,$_name,$_data,$_mustUnderstand,$_actor));
+			else
+				array_push($defaultHeaders,new SoapHeader($_nameSpace,$_name,$_data,$_mustUnderstand));
+			return self::getSoapClient()->__setSoapheaders($defaultHeaders);
+		}
+		else
+			return false;
+	}
+	/**
+	 * Sets the SoapClient Stream context HTTP Header name according to its value
+	 * If a context already exists, it tries to modify it
+	 * It the context does not exist, it then creates it with the header name and its value
+	 * @uses PackageNameWsdlClass::getSoapClient()
+	 * @param string $_headerName
+	 * @param mixed $_headerValue
+	 * @return bool true|false
+	 */
+	public function setHttpHeader($_headerName,$_headerValue)
+	{
+		if(self::getSoapClient() && !empty($_headerName))
+		{
+			$streamContext = (isset(self::getSoapClient()->_stream_context) && is_resource(self::getSoapClient()->_stream_context))?self::getSoapClient()->_stream_context:null;
+			if(!is_resource($streamContext))
+			{
+				$options = array();
+				$options['http'] = array();
+				$options['http']['header'] = '';
+			}
+			else
+			{
+				$options = stream_context_get_options($streamContext);
+				if(is_array($options))
+				{
+					if(!array_key_exists('http',$options) || !is_array($options['http']))
+					{
+						$options['http'] = array();
+						$options['http']['header'] = '';
+					}
+					elseif(!array_key_exists('header',$options['http']))
+						$options['http']['header'] = '';
+				}
+				else
+				{
+					$options = array();
+					$options['http'] = array();
+					$options['http']['header'] = '';
+				}
+			}
+			if(count($options) && array_key_exists('http',$options) && is_array($options['http']) && array_key_exists('header',$options['http']) && is_string($options['http']['header']))
+			{
+				$lines = explode("\r\n",$options['http']['header']);
+				/**
+				 * Ensure there is only one header entry for this header name
+				 */
+				$newLines = array();
+				foreach($lines as $line)
+				{
+					if(!empty($line) && strpos($line,$_headerName) === false)
+						array_push($newLines,$line);
+				}
+				/**
+				 * Add new header entry
+				 */
+				array_push($newLines,"$_headerName: $_headerValue");
+				/**
+				 * Set the context http header option
+				 */
+				$options['http']['header'] = implode("\r\n",$newLines);
+				/**
+				 * Create context if it does not exist
+				 */
+				if(!is_resource($streamContext))
+					return (self::getSoapClient()->_stream_context = stream_context_create($options))?true:false;
+				/**
+				 * Set the new context http header option
+				 */
+				else
+					return stream_context_set_option(self::getSoapClient()->_stream_context,'http','header',$options['http']['header']);
+			}
+			else
+				return false;
+		}
+		else
+			return false;
 	}
 	/**
 	 * Method alias to count

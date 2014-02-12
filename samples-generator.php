@@ -21,10 +21,6 @@ if(!function_exists('lcfirst'))
  * Librairies
  */
 $localDir = dirname(__FILE__) . '/';
-require_once $localDir . 'Base/src/struct.php';
-require_once $localDir . 'PhpGenerator/src/php_generator.php';
-require_once $localDir . 'PhpGenerator/src/structs/php_generator_return_data.php';
-require_once $localDir . 'PhpGenerator/src/structs/php_generator_parameter.php';
 require_once $localDir . 'WsdlToPhpModel.php';
 require_once $localDir . 'WsdlToPhpStruct.php';
 require_once $localDir . 'WsdlToPhpService.php';
@@ -125,11 +121,8 @@ if(true)
 	$w = new WsdlToPhpGenerator($wsdl);
 	WsdlToPhpGenerator::setOptionGenerateAutoloadFile(true);
 	WsdlToPhpGenerator::setOptionGenerateWsdlClassFile(true);
-	WsdlToPhpGenerator::setOptionResponseAsWsdlObject(true);
 	WsdlToPhpGenerator::setOptionGenerateTutorialFile(true);
-	WsdlToPhpGenerator::setOptionSendArrayAsParameter(false);
-	WsdlToPhpGenerator::setOptionSendParametersAsArray(false);
-	WsdlToPhpGenerator::setOptionCategory(WsdlToPhpGenerator::OPT_CAT_START_NAME);
+	WsdlToPhpGenerator::setOptionCategory(WsdlToPhpGenerator::OPT_CAT_TYPE);
 	WsdlToPhpGenerator::setOptionSubCategory(WsdlToPhpGenerator::OPT_SUB_CAT_END_NAME);
 	WsdlToPhpGenerator::setOptionAddComments(array('date'=>date('Y-m-d'),'author'=>'Mikaël DELSOL','version'=>1));
 	echo "\r\nStart generation at " . date('H:i:s');
@@ -142,4 +135,3 @@ if(true)
 	echo "\r\nGenerate doc end " . date('H:i:s');
 	print_r($w->getAudit());
 }
-?>

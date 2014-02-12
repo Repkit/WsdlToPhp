@@ -38,13 +38,14 @@ class WsdlToPhpStructValue extends WsdlToPhpModel
 		$this->setOwner($_wsdlToPhpStruct);
 	}
 	/**
-	 * Method to return the name of the value as constant
+	 * Returns the name of the value as constant
 	 * @see WsdlToPhpModel::getCleanName()
 	 * @uses WsdlToPhpModel::getCleanName()
 	 * @uses WsdlToPhpModel::getName()
 	 * @uses WsdlToPhpModel::getOwner()
 	 * @uses WsdlToPhpStructValue::constantSuffix()
 	 * @uses WsdlToPhpStructValue::getIndex()
+	 * @uses WsdlToPhpStructValue::getOwner()
 	 * @uses WsdlToPhpGenerator::getOptionGenericConstantsNames()
 	 * @param bool $_keepMultipleUnderscores optional, allows to keep the multiple consecutive underscores
 	 * @return string
@@ -70,7 +71,7 @@ class WsdlToPhpStructValue extends WsdlToPhpModel
 		return self::getValueWithinItsType($this->getName());
 	}
 	/**
-	 * Get the index attribute value
+	 * Gets the index attribute value
 	 * @return int
 	 */
 	public function getIndex()
@@ -78,7 +79,7 @@ class WsdlToPhpStructValue extends WsdlToPhpModel
 		return $this->index;
 	}
 	/**
-	 * Set the index attribute value
+	 * Sets the index attribute value
 	 * @param int
 	 * @return int $_index
 	 */
@@ -91,10 +92,9 @@ class WsdlToPhpStructValue extends WsdlToPhpModel
 	 * @see WsdlToPhpModel::getComment()
 	 * @uses WsdlToPhpStructValue::getValue()
 	 * @uses WsdlToPhpModel::addMetaComment()
-	 * @param int $_part comment part
 	 * @return array
 	 */
-	public function getComment($_part = '')
+	public function getComment()
 	{
 		$value = $this->getValue();
 		$comments = array();
@@ -116,7 +116,7 @@ class WsdlToPhpStructValue extends WsdlToPhpModel
 		return 'const ' . $this->getCleanName() . ' = ' . var_export($this->getValue(),true) . ';';
 	}
 	/**
-	 * Return the index which has to be added at the end of natural constant name defined with the value cleaned
+	 * Returns the index which has to be added at the end of natural constant name defined with the value cleaned
 	 * Allows to avoid multiple constant name to be indentic
 	 * @param string $_structName the struct name
 	 * @param mixed $_value the value
@@ -137,7 +137,17 @@ class WsdlToPhpStructValue extends WsdlToPhpModel
 		return self::$uniqueConstants[$key];
 	}
 	/**
-	 * Return class name
+	 * Returns the owner model object, meaning a WsdlToPhpStruct object
+	 * @see WsdlToPhpModel::getOwner()
+	 * @uses WsdlToPhpModel::getOwner()
+	 * @return WsdlToPhpStruct
+	 */
+	public function getOwner()
+	{
+		return parent::getOwner();
+	}
+	/**
+	 * Returns class name
 	 * @return string __CLASS__
 	 */
 	public function __toString()
@@ -145,4 +155,3 @@ class WsdlToPhpStructValue extends WsdlToPhpModel
 		return __CLASS__;
 	}
 }
-?>
